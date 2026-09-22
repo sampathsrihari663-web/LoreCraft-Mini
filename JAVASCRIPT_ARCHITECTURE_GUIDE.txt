@@ -1,0 +1,359 @@
+================================================================================
+                    LORECRAFT — JAVASCRIPT ARCHITECTURE GUIDE
+================================================================================
+This document provides a comprehensive explanation of every JavaScript file in
+the LoreCraft project: what each file does, its core functions, and how they 
+connect together to create the full RPG learning experience.
+================================================================================
+
+
+TABLE OF CONTENTS:
+--------------------------------------------------------------------------------
+1. OVERVIEW & CODEBASE ARCHITECTURE
+2. DOM CONTROLLERS & UI LOGIC
+   - js/main.js
+   - js/combat.js
+   - js/utils.js
+3. CORE DATA & API SERVICES
+   - js/service/topicService.js
+   - js/service/combatService.js
+   - js/service/groqService.js
+   - js/service/supabaseConfig.js
+4. PEDAGOGY & LESSON DATABASE
+   - js/service/lessonDatabase.js
+   - js/service/lessons/pythonLessons.js
+   - js/service/lessons/csharpLessons.js
+   - js/service/lessons/cppLessons.js
+   - js/service/lessons/htmlLessons.js
+   - js/service/lessons/cssLessons.js
+   - js/service/lessons/javascriptLessons.js
+5. ERROR HANDLING & EXCEPTION CLASSES
+   - exception/apiException.js
+   - exception/validationException.js
+6. SERVERLESS BACKEND (NETLIFY)
+   - netlify/functions/evaluate.js
+--------------------------------------------------------------------------------
+
+
+================================================================================
+1. OVERVIEW & CODEBASE ARCHITECTURE
+================================================================================
+LoreCraft uses modern vanilla JavaScript (Native ES Modules) without any
+bundlers, build steps, or frameworks. The architecture follows a strict
+Separation of Concerns:
+
+  [HTML Page (views/)]
+          │
+          ▼
+  [DOM Controllers (js/main.js, js/combat.js)]
+          │
+          ├──> [Utilities (js/utils.js)]
+          ├──> [Error Handling (exception/*)]
+          │
+          ▼
+  [Services Layer (js/service/*)] ─── NEVER touches the DOM
+          │
+          ├──> localStorage (Local browser state & syllabus progression)
+          ├──> Lesson Database (All 92 lessons, code demos & questions)
+          └──> Netlify Function (/.netlify/functions/evaluate) ──> Groq API
+
+
+================================================================================
+2. DOM CONTROLLERS & UI LOGIC
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: js/main.js
+RESPONSIBILITY: Controls the Campaign Map (views/index.html)
+--------------------------------------------------------------------------------
+What this file does:
+- Controls the entire campaign map user interface.
+- Renders the realm selector tabs across all 6 programming languages
+  (Python, C#, C++, HTML, CSS, JavaScript).
+- Organizes chambers into three distinct tiers:
+    * Tier 1: Foundations
+    * Tier 2: Core
+    * Tier 3: Advanced
+- Draws the winding, alternating RPG node path on the screen.
+- Enforces visual states for nodes:
+    * Locked nodes: Red ember outline, locked icon, disabled from clicking.
+    * Unlocked nodes: Golden glowing outline, clickable, links to chamber trial.
+    * Cleared nodes: Moss green outline, checkmark icon, displays clearance.
+- Updates the Campaign HUD at the top of the map:
+    * Total Chambers
+    * Cleared count
+    * Available count
+    * Locked count
+- Manages the "Reset Current Realm Progress" action button.
+
+Key Functions in js/main.js:
+1. toRomanNumeral(num):
+   Converts chapter numbers into classic numerals (e.g. 1 -> Chamber I, 2 -> II).
+2. createTierDividerElement(tierNumber, tierName, tierTopics):
+   Creates visual milestone banners separating Foundations, Core, and Advanced.
+3. createTopicNodeElement(topic, index, totalInTier):
+   Builds the HTML node for each chamber on the winding trail.
+4. updateCampaignHud(topics):
+   Calculates stats (cleared, unlocked, locked) and updates the top HUD counter.
+5. switchWorld(worldKey):
+   Loads the selected language syllabus and redraws the campaign map.
+6. renderWorldSelector():
+   Renders the 6 language buttons (Python, C#, C++, HTML, CSS, JavaScript).
+7. initializeMap():
+   Runs when the page finishes loading; checks URL parameters or saved memory
+   to render the player's last viewed world.
+
+
+--------------------------------------------------------------------------------
+FILE: js/combat.js
+RESPONSIBILITY: Controls the Chamber Trial Page (views/combat.html)
+--------------------------------------------------------------------------------
+What this file does:
+- Controls the two-phase trial experience inside every chamber:
+    * Phase 1: Scroll of Knowledge (Teaching manuscript, rules, and code)
+    * Phase 2: Guardian's Trial (2 to 3 targeted open-ended questions)
+- Renders the lesson explanation, key takeaways, and formatted code snippet.
+- Generates dynamic answer input textareas for each trial question.
+- Validates student answers before sending to the AI (rejects blank fields).
+- Sends answers to Groq AI via groqService.js.
+- Reveals the wax seal result badge (S, A, B, C, D) and per-question cards:
+    * Rating: Correct, Partially Correct, or Needs Correction
+    * Arbiter Suggestion: Constructive feedback on what was good
+    * How to Fix: Clear guidance on the right concept and syntax
+- When the grade is passing (S, A, B, or C), it calls topicService.js to mark
+  the chamber cleared and automatically unlock the next chamber.
+
+Key Functions in js/combat.js:
+1. renderLessonPanel(topic, lessonData):
+   Populates the Scroll of Knowledge with the summary, rules, and code example.
+2. renderCombatForm(topic, questions):
+   Builds the dynamic form with separate question prompts and textareas.
+3. validateMultiCombatAnswers(answersList):
+   Ensures every single question has a meaningful typed answer.
+4. displayGradeSeal(gradeResult, answersList):
+   Renders the animated wax seal badge and the breakdown feedback cards.
+5. handleCombatSubmit(event):
+   Event listener that locks the UI, requests AI evaluation, reveals grades,
+   and saves progress to localStorage.
+6. initializeCombat():
+   Reads the URL query parameters (?topic=py-1&world=python) on page load
+   and orchestrates the chamber rendering.
+
+
+--------------------------------------------------------------------------------
+FILE: js/utils.js
+RESPONSIBILITY: Shared DOM and URL Helper Functions
+--------------------------------------------------------------------------------
+What this file does:
+- Provides clean, lightweight utility shortcuts used across multiple scripts.
+- Prevents boilerplate repetition throughout the codebase.
+
+Key Functions in js/utils.js:
+1. qs(selector, parent = document):
+   Shorthand for document.querySelector.
+2. qsa(selector, parent = document):
+   Shorthand for Array.from(document.querySelectorAll).
+3. getUrlParam(paramName):
+   Safely extracts URL query parameters (e.g., ?topic=py-1 -> returns "py-1").
+4. escapeHTML(str):
+   Sanitizes raw text strings into safe HTML to prevent XSS injection attacks.
+5. debounce(func, delay = 250):
+   Debounce wrapper to limit execution rate of rapid events.
+
+
+================================================================================
+3. CORE DATA & API SERVICES
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: js/service/topicService.js
+RESPONSIBILITY: Manages Syllabus Data, localStorage, and Tier Progression
+--------------------------------------------------------------------------------
+What this file does:
+- Contains the master syllabus data for all 6 worlds (92 topics total).
+- Defines the 6 worlds: Python, C#, C++, HTML, CSS, JavaScript.
+- Interfaces directly with browser localStorage to store and retrieve progress.
+- Enforces strict sequential and tier-based unlocking:
+    * Clearing a chamber unlocks the next sequential chamber.
+    * Clearing the last chamber of Tier 1 unlocks the first chamber of Tier 2.
+    * Clearing Tier 2 unlocks Tier 3.
+- Never touches the DOM — only reads, writes, and returns data objects.
+
+Key Functions in js/service/topicService.js:
+1. getDemoTopicsForWorld(worldKey):
+   Reads the saved topic array from localStorage under 'lorecraft_world_v3_[world]'.
+   If the user has never played before, loads the default starter syllabus.
+2. saveDemoTopicsForWorld(worldKey, topics):
+   Serializes the modified topic array with JSON.stringify and saves it.
+3. fetchCampaignTopics(worldKey):
+   Public function called by js/main.js to load topics for the active world.
+4. findTopicById(topicId):
+   Searches across all 6 worlds to find a specific topic object by its ID.
+5. getTopicLessonAndQuestions(topic):
+   Retrieves the structured lesson manuscript and trial questions for a topic.
+6. markTopicCompleted(topicId):
+   Marks a topic cleared, unlocks the next node, checks tier completion,
+   and saves the state permanently in localStorage.
+7. resetDemoProgress(worldKey):
+   Clears localStorage for a specific world or all worlds on reset request.
+
+
+--------------------------------------------------------------------------------
+FILE: js/service/combatService.js
+RESPONSIBILITY: Loads Trial Boss Battles
+--------------------------------------------------------------------------------
+What this file does:
+- Fetches the topic data along with its full teaching manuscript and questions.
+- Serves as the clean data bridge between topicService.js and js/combat.js.
+
+Key Functions in js/service/combatService.js:
+1. fetchTopicBossBattle(topicId):
+   Finds the topic by ID, loads its lesson and questions, and returns a
+   unified combat configuration object.
+
+
+--------------------------------------------------------------------------------
+FILE: js/service/groqService.js
+RESPONSIBILITY: Communicates with AI Arbiter (Groq API)
+--------------------------------------------------------------------------------
+What this file does:
+- Formulates the system prompt and pedagogical criteria for evaluating answers.
+- In production on Netlify, it proxies requests through the secure Netlify
+  Serverless Function (/.netlify/functions/evaluate) to protect the API key.
+- Supports an optional local key stored in localStorage (for local testing).
+- Contains an offline simulated Arbiter that scores answers intelligently if
+  the user has no internet connection or serverless function access.
+- Evaluates short answers, vernacular/informal language, and Hinglish.
+- Parses the AI's returned JSON and standardizes ratings, suggestions, and fixes.
+
+Key Functions in js/service/groqService.js:
+1. getLocalGroqKey() & setLocalGroqKey(key):
+   Manages optional client-side API key override in localStorage.
+2. isGroqConfigured():
+   Returns true since the Netlify serverless proxy or fallback is always ready.
+3. simulateArbiterEvaluation(questionOrList, playerAnswer):
+   Offline fallback scoring that grades based on keyword presence and length.
+4. parseEvaluationPayload(rawContent):
+   Parses JSON returned by Groq, validates S/A/B/C/D grade, and structures
+   the per-question feedback cards.
+5. gradePlayerAnswer(questionOrList, playerAnswer):
+   The main grading function called by js/combat.js. Sends prompts to Netlify
+   function -> Groq -> returns full evaluation report.
+
+
+--------------------------------------------------------------------------------
+FILE: js/service/supabaseConfig.js
+RESPONSIBILITY: Optional Supabase Configuration (Legacy / Future Reference)
+--------------------------------------------------------------------------------
+What this file does:
+- Contains schema column mappings and helper functions if you ever decide
+  to connect a live Supabase PostgreSQL database in the future.
+- Currently, LoreCraft runs on pure localStorage, so this file remains as a
+  clean reference without interfering with the local storage engine.
+
+
+================================================================================
+4. PEDAGOGY & LESSON DATABASE
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: js/service/lessonDatabase.js
+RESPONSIBILITY: Central Dispatcher for All 6 Language Manuscripts
+--------------------------------------------------------------------------------
+What this file does:
+- Imports the 6 language lesson files and combines them into one unified lookup.
+- If a chamber is loaded, it retrieves the comprehensive manuscript, core
+  rules, runic code example, and 2 to 3 targeted trial questions.
+
+Key Functions in js/service/lessonDatabase.js:
+1. getChamberLessonData(topic):
+   Takes any syllabus topic and returns its dedicated lesson content.
+
+
+--------------------------------------------------------------------------------
+LANGUAGE MANUSCRIPT FILES (js/service/lessons/*.js)
+--------------------------------------------------------------------------------
+Each of these 6 files contains in-depth, production-quality teaching content
+and 2-3 tailored trial questions for every topic in its syllabus:
+
+1. js/service/lessons/pythonLessons.js (16 Topics)
+   - Python Foundations (Variables, Operators, I/O, Conditionals, Loops)
+   - Python Core (Functions, Lists/Tuples, Dictionaries/Sets, Strings, Files, Exceptions)
+   - Python Advanced (Classes, Inheritance, Modules, Comprehensions, Generators)
+
+2. js/service/lessons/csharpLessons.js (16 Topics)
+   - C# Foundations (Types, Operators, Console I/O, Conditionals, Loops)
+   - C# Core (Methods, Arrays/Lists, Strings, Exceptions, Structs vs Classes)
+   - C# Advanced (Interfaces, Properties, Delegates/Events, LINQ, Generics, File I/O)
+
+3. js/service/lessons/cppLessons.js (16 Topics)
+   - C++ Foundations (Primitive Types, Operators, cin/cout, Conditionals, Loops)
+   - C++ Core (Function Overloading, Arrays/Strings, Pointers/References, Structs, new/delete)
+   - C++ Advanced (Classes, Constructors/Destructors, Inheritance, Polymorphism, Vectors, Files)
+
+4. js/service/lessons/htmlLessons.js (14 Topics)
+   - HTML Foundations (Structure/Tags, Headings/Paragraphs, Links/Images, Lists, Tables)
+   - HTML Core (Forms/Inputs, Semantic Elements, Media, Block vs Inline, Attributes)
+   - HTML Advanced (Accessibility/ARIA, SEO Meta, Canvas/SVG, Responsive Web Design)
+
+5. js/service/lessons/cssLessons.js (14 Topics)
+   - CSS Foundations (Selectors, Box Model, Colors/Backgrounds, Typography, Borders/Shadows)
+   - CSS Core (Flexbox, CSS Grid, Positioning, Pseudo-classes, Transitions)
+   - CSS Advanced (Animations, Responsive Media Queries, Variables, Specificity)
+
+6. js/service/lessons/javascriptLessons.js (16 Topics)
+   - JS Foundations (var/let/const, Data Types, Conditionals, Loops, Functions)
+   - JS Core (Arrays/Methods, Objects, DOM Manipulation, Events, ES6+ Syntax)
+   - JS Advanced (Async/Await, Fetch API, Try/Catch, Closures, JSON, ES Modules)
+
+
+================================================================================
+5. ERROR HANDLING & EXCEPTION CLASSES
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: exception/apiException.js
+RESPONSIBILITY: Custom API & Network Error Wrapper
+--------------------------------------------------------------------------------
+What this file does:
+- Extends the native JavaScript `Error` class to create a specialized
+  `ApiException` for network failures, HTTP errors, and Groq timeouts.
+- Stores both a technical error message (for developer console) and a
+  graceful `userFriendlyMessage` formatted like an ancient RPG message.
+
+Key Functions in exception/apiException.js:
+1. handleApiError(error, fallbackMessage):
+   Inspects any caught error, determines its type, and returns an ApiException
+   with helpful advice for the player.
+
+
+--------------------------------------------------------------------------------
+FILE: exception/validationException.js
+RESPONSIBILITY: Form & Input Validation Error
+--------------------------------------------------------------------------------
+What this file does:
+- Extends the native `Error` class to represent form validation errors
+  (e.g., player submitted an empty answer textarea).
+- Thrown during combat submission before any network call is dispatched.
+
+
+================================================================================
+6. SERVERLESS BACKEND (NETLIFY)
+================================================================================
+
+--------------------------------------------------------------------------------
+FILE: netlify/functions/evaluate.js
+RESPONSIBILITY: Secure Cloud Backend Function for Groq AI
+--------------------------------------------------------------------------------
+What this file does:
+- Runs securely on Netlify's backend servers whenever the player submits a trial.
+- Reads `process.env.GROQ_API_KEY` from Netlify's environment variables.
+- Protects your private Groq key so that it is NEVER visible in client browser
+  DevTools or committed to GitHub.
+- Handles CORS preflight headers (OPTIONS).
+- Dispatches the prompts to Groq API (`https://api.groq.com/openai/v1/chat/completions`)
+  using `openai/gpt-oss-120b` (with automatic fallback to `openai/gpt-oss-20b`).
+- Returns the clean AI JSON response back to the player's browser.
+================================================================================
+                        END OF ARCHITECTURE GUIDE
+================================================================================
