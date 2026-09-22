@@ -1,0 +1,1203 @@
+/**
+ * File: css/style.css
+ * Responsibility: Complete styling for LoreCraft campaign map and combat arena.
+ * Adheres strictly to the atlas-like dungeon aesthetic, typography rules,
+ * and design tokens. No generic SaaS cards, gradient washes, or ALL-CAPS labels.
+ */
+
+/* ==========================================================================
+   1. DESIGN TOKENS & CSS VARIABLES
+   ========================================================================== */
+:root {
+  /* Core palette specified in project requirements */
+  --bg-dungeon: #1B1F2A;        /* Deep indigo-slate: unexplored map background */
+  --panel-parchment: #E8DCC4;   /* Aged parchment: content panels and scrolls */
+  --ink: #2B2118;               /* Deep iron gall ink for text on parchment */
+  --text-light: #E8DCC4;        /* Light parchment text for dark dungeon backgrounds */
+  --accent-gold: #C9A24B;       /* Unlocked nodes, primary buttons, active states */
+  --accent-ember: #A23B3B;      /* Locked nodes, failing grades, errors */
+  --accent-moss: #5C7A5C;       /* Passing grade, completed nodes, success states */
+
+  /* Structural accents */
+  --bg-dungeon-card: #141720;
+  --trail-line: #373D4D;
+  --parchment-border: #3A2F25;
+  --parchment-subtle: #D8CCA8;
+
+  /* Typography */
+  --font-heading: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-body: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ==========================================================================
+   2. RESET & GLOBAL BASE STYLES
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dungeon);
+  color: var(--text-light);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  /* Subtle parchment grain overlay on the dark dungeon canvas */
+  background-image: radial-gradient(circle at 50% 0%, rgba(201, 162, 75, 0.05) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Accessible focus styling */
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   3. HEADER & BANNER
+   ========================================================================== */
+.site-header {
+  padding: 2rem 1.5rem 1.25rem;
+  text-align: center;
+  border-bottom: 1px solid var(--trail-line);
+}
+
+.site-title {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: var(--text-light);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.site-subtitle {
+  font-size: 0.95rem;
+  color: #9BA3B5;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+/* Campaign HUD stats */
+.campaign-hud {
+  display: inline-flex;
+  gap: 1.5rem;
+  background-color: var(--bg-dungeon-card);
+  padding: 0.5rem 1.4rem;
+  border: 1px solid var(--trail-line);
+  border-radius: 3px;
+  margin-bottom: 0.75rem;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.hud-label {
+  font-size: 0.72rem;
+  color: #8C96A8;
+  letter-spacing: 0.02em;
+}
+
+.hud-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.hud-value.hud-cleared {
+  color: var(--accent-moss);
+}
+
+.hud-value.hud-unlocked {
+  color: var(--accent-gold);
+}
+
+.hud-value.hud-locked {
+  color: var(--accent-ember);
+}
+
+/* Header auxiliary actions */
+.header-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.btn-text-action {
+  background: transparent;
+  color: #9BA3B5;
+  border: 1px solid var(--trail-line);
+  padding: 0.4rem 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-text-action:hover {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+/* ==========================================================================
+   3B. WORLD / REALM SELECTOR
+   ========================================================================== */
+.world-selector-container {
+  margin: 1.25rem auto 0;
+  max-width: 780px;
+}
+
+.world-selector-label {
+  font-size: 0.75rem;
+  color: #8C96A8;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.45rem;
+  text-align: center;
+}
+
+.world-selector {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.world-tab {
+  background-color: var(--bg-dungeon-card);
+  color: #AAB3C4;
+  border: 1px solid var(--trail-line);
+  padding: 0.45rem 0.95rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.world-tab:hover {
+  border-color: #737D94;
+  color: var(--text-light);
+}
+
+.world-tab.active {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background-color: rgba(201, 162, 75, 0.12);
+  box-shadow: 0 0 10px rgba(201, 162, 75, 0.2);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   4. CAMPAIGN MAP TRAIL LAYOUT (views/index.html)
+   ========================================================================== */
+.map-layout-container {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 5rem;
+}
+
+/* Tier Milestone Divider along the trail path */
+.tier-divider {
+  width: 100%;
+  max-width: 440px;
+  margin: 1rem auto;
+  background-color: #12151D;
+  border: 1px solid var(--trail-line);
+  border-radius: 3px;
+  padding: 0.65rem 1.25rem;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.tier-divider.tier-locked {
+  border-color: var(--accent-ember);
+  background-color: rgba(162, 59, 59, 0.08);
+}
+
+.tier-divider.tier-active {
+  border-color: var(--accent-gold);
+  background-color: rgba(201, 162, 75, 0.08);
+}
+
+.tier-divider.tier-completed {
+  border-color: var(--accent-moss);
+  background-color: rgba(92, 122, 92, 0.08);
+}
+
+.tier-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.tier-locked .tier-title {
+  color: #E89A9A;
+}
+
+.tier-active .tier-title {
+  color: var(--accent-gold);
+}
+
+.tier-completed .tier-title {
+  color: #A2CCA2;
+}
+
+.tier-subtitle {
+  font-size: 0.78rem;
+  color: #8C96A8;
+}
+
+/* Status / Alert banner */
+.status-banner {
+  max-width: 680px;
+  margin: 0 auto 1.25rem;
+  padding: 0.65rem 1rem;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  text-align: center;
+  line-height: 1.45;
+}
+
+.status-banner.banner-notice {
+  background-color: rgba(201, 162, 75, 0.12);
+  border: 1px solid var(--accent-gold);
+  color: var(--text-light);
+}
+
+.status-banner.banner-error {
+  background-color: rgba(162, 59, 59, 0.15);
+  border: 1px solid var(--accent-ember);
+  color: #F0A5A5;
+}
+
+/* Parchment intro scroll cleanly separated from the trail path */
+.parchment-intro {
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+  background-color: var(--panel-parchment);
+  color: var(--ink);
+  padding: 1.25rem 1.75rem;
+  border: 2px solid var(--parchment-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  position: relative;
+  text-align: left;
+}
+
+.parchment-intro::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  border: 1px solid var(--parchment-subtle);
+  pointer-events: none;
+}
+
+.intro-heading {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  margin-bottom: 0.35rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.intro-text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #3B3127;
+}
+
+/* Trail Section: Scoped specifically to the winding path and nodes */
+.trail-wrapper {
+  position: relative;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0.5rem 0 3rem;
+}
+
+/* The vertical path spine down the center */
+.trail-path-line {
+  position: absolute;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--trail-line) 4%,
+    var(--trail-line) 96%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* Node container along the path */
+.trail-nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Single topic node on the map: precisely 2.5rem from center line */
+.map-node {
+  width: calc(50% - 2.5rem);
+  position: relative;
+  background-color: var(--bg-dungeon-card);
+  padding: 1.15rem 1.35rem;
+  border-radius: 4px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  display: block;
+}
+
+/* Alternating left and right placement */
+.map-node.node-left {
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.map-node.node-right {
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+/* Horizontal branch connector meeting the exact center line */
+.map-node::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  width: 2.5rem;
+  background-color: var(--trail-line);
+  transform: translateY(-50%);
+}
+
+.map-node.node-left::after {
+  right: -2.5rem;
+}
+
+.map-node.node-right::after {
+  left: -2.5rem;
+}
+
+/* Waypoint circular rune on the center spine where the branch connects */
+.map-node::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--trail-line);
+  z-index: 3;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.map-node.node-left::before {
+  right: calc(-2.5rem - 4px);
+  transform: translateY(-50%);
+}
+
+.map-node.node-right::before {
+  left: calc(-2.5rem - 4px);
+  transform: translateY(-50%);
+}
+
+/* Waypoint rune glows matching node status */
+.map-node.node-unlocked::before {
+  background-color: var(--accent-gold);
+  box-shadow: 0 0 6px rgba(201, 162, 75, 0.6);
+}
+
+.map-node.node-completed::before {
+  background-color: var(--accent-moss);
+  box-shadow: 0 0 6px rgba(92, 122, 92, 0.6);
+}
+
+.map-node.node-locked::before {
+  background-color: var(--accent-ember);
+}
+
+/* Node state: LOCKED */
+.map-node.node-locked {
+  border: 1px solid var(--accent-ember);
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.map-node.node-locked:hover {
+  box-shadow: none;
+}
+
+/* Node state: UNLOCKED */
+.map-node.node-unlocked {
+  border: 1px solid var(--accent-gold);
+  cursor: pointer;
+}
+
+.map-node.node-unlocked:hover {
+  border-color: #E2BC63;
+  box-shadow: 0 0 14px rgba(201, 162, 75, 0.25);
+}
+
+/* Node state: COMPLETED */
+.map-node.node-completed {
+  border: 1px solid var(--accent-moss);
+  cursor: pointer;
+}
+
+.map-node.node-completed:hover {
+  border-color: #799F79;
+  box-shadow: 0 0 14px rgba(92, 122, 92, 0.25);
+}
+
+/* Node header with status indicator and chapter sequence */
+.node-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.node-sequence {
+  color: #8C96A8;
+  letter-spacing: 0.03em;
+}
+
+.node-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.node-locked .node-status-badge {
+  color: var(--accent-ember);
+}
+
+.node-unlocked .node-status-badge {
+  color: var(--accent-gold);
+}
+
+.node-completed .node-status-badge {
+  color: var(--accent-moss);
+}
+
+/* Node typography */
+.node-title {
+  font-family: var(--font-heading);
+  font-size: 1.22rem;
+  color: var(--text-light);
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+.node-description {
+  font-size: 0.88rem;
+  color: #AAB3C4;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   5. COMBAT ARENA SCREEN (views/combat.html)
+   ========================================================================== */
+.combat-container {
+  max-width: 620px;
+  margin: 2rem auto 5rem;
+  padding: 0 1.25rem;
+}
+
+.navigation-bar {
+  margin-bottom: 1.5rem;
+}
+
+.back-link {
+  color: #9BA3B5;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.back-link:hover {
+  color: var(--accent-gold);
+}
+
+/* Centered aged parchment scroll panel */
+.parchment-scroll,
+.lesson-panel {
+  background-color: var(--panel-parchment);
+  color: var(--ink);
+  padding: 2.25rem 2rem;
+  border: 2px solid var(--parchment-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  position: relative;
+  border-radius: 2px;
+}
+
+.lesson-panel {
+  margin-bottom: 2.5rem;
+}
+
+/* Inset border ring for manuscript feel */
+.parchment-scroll::before,
+.lesson-panel::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  border: 1px solid var(--parchment-subtle);
+  pointer-events: none;
+}
+
+/* Lesson Header & Badges */
+.lesson-badge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.lesson-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #635345;
+  letter-spacing: 0.05em;
+}
+
+.lesson-realm-badge {
+  font-size: 0.78rem;
+  color: #2B2118;
+  background-color: #D8CCA8;
+  padding: 0.2rem 0.55rem;
+  border-radius: 2px;
+}
+
+.lesson-topic-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--parchment-subtle);
+}
+
+.lesson-summary {
+  margin-bottom: 1.35rem;
+}
+
+.lesson-paragraph {
+  font-size: 0.98rem;
+  line-height: 1.68;
+  color: #2F241A;
+  margin-bottom: 0.75rem;
+}
+
+.lesson-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Key Principles Box */
+.lesson-keypoints-box {
+  background-color: #FAF4E8;
+  border: 1px solid #D8CCA8;
+  padding: 1.1rem 1.35rem;
+  border-radius: 2px;
+  margin-bottom: 1.35rem;
+}
+
+.keypoints-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.lesson-keypoints-list {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #3B3127;
+}
+
+.lesson-keypoints-list strong {
+  color: #1F1710;
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+/* Code Demonstration Box */
+.lesson-code-box {
+  background-color: #151821;
+  color: #E8DCC4;
+  border: 1px solid var(--trail-line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.code-box-header {
+  background-color: #10121A;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  color: #8C96A8;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--trail-line);
+}
+
+.lesson-code {
+  padding: 0.85rem 1rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.lesson-action-footer {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.btn-begin-trial {
+  display: inline-block;
+  background-color: var(--accent-gold);
+  color: #1B1F2A;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.75rem 1.6rem;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease;
+}
+
+.btn-begin-trial:hover {
+  background-color: #D6AF55;
+}
+
+/* Trial Instructions & Review Button */
+.trial-instructions {
+  font-size: 0.92rem;
+  color: #524436;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.trial-aux-bar {
+  margin-bottom: 1.25rem;
+  text-align: right;
+}
+
+.btn-review-lesson {
+  font-size: 0.82rem;
+  color: #635345;
+  text-decoration: none;
+  display: inline-block;
+  transition: color 0.15s ease;
+}
+
+.btn-review-lesson:hover {
+  color: #1B1F2A;
+}
+
+/* Multi-Question Cards Container */
+.questions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.question-card {
+  background-color: #FAF4E8;
+  border: 1px solid #D8CCA8;
+  border-radius: 3px;
+  padding: 1.15rem 1.25rem;
+}
+
+.question-card-header {
+  margin-bottom: 0.4rem;
+}
+
+.question-number-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8C7338;
+  letter-spacing: 0.03em;
+}
+
+.question-prompt-text {
+  font-family: var(--font-heading);
+  font-size: 1.12rem;
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 0.85rem;
+}
+
+/* Chamber context & boss name */
+.combat-chamber-label {
+  font-size: 0.82rem;
+  color: #635345;
+  margin-bottom: 0.35rem;
+}
+
+.combat-topic-title {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--parchment-subtle);
+}
+
+/* Answer form */
+.combat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.combat-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4A3E33;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.combat-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.85rem;
+  background-color: #FAF4E8;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  border: 1px solid #736353;
+  border-radius: 2px;
+  resize: vertical;
+}
+
+.combat-textarea:focus {
+  outline: 2px solid #2B2118;
+  outline-offset: 1px;
+}
+
+.combat-textarea:disabled {
+  opacity: 0.7;
+  background-color: #E2D6BE;
+  cursor: not-allowed;
+}
+
+/* Submit button */
+.btn-combat-submit {
+  background-color: var(--accent-gold);
+  color: #1B1F2A;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.85rem 1.75rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background-color 0.15s ease;
+}
+
+.btn-combat-submit:hover:not(:disabled) {
+  background-color: #D6AF55;
+}
+
+.btn-combat-submit:disabled {
+  background-color: #9A8352;
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.combat-error-message {
+  color: var(--accent-ember);
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+  display: none;
+}
+
+.combat-error-message.visible {
+  display: block;
+}
+
+/* ==========================================================================
+   6. WAX STAMP SEAL RESULT BADGE
+   ========================================================================== */
+.grade-result-container {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--parchment-subtle);
+  text-align: center;
+  /* Calm reveal transition */
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.grade-result-container.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Wax seal badge shape */
+.seal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  position: relative;
+  background-color: #FAF4E8;
+}
+
+/* Circular ring styling for wax seal impression */
+.seal-badge::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  border-radius: 50%;
+  border: 1px dashed currentColor;
+}
+
+/* Grade colors (S/A/B/C -> gold/moss, D -> ember) */
+.seal-grade-s,
+.seal-grade-a {
+  color: var(--accent-gold);
+  border: 2px solid var(--accent-gold);
+  background-color: rgba(201, 162, 75, 0.12);
+}
+
+.seal-grade-b,
+.seal-grade-c {
+  color: var(--accent-moss);
+  border: 2px solid var(--accent-moss);
+  background-color: rgba(92, 122, 92, 0.12);
+}
+
+.seal-grade-d {
+  color: var(--accent-ember);
+  border: 2px solid var(--accent-ember);
+  background-color: rgba(162, 59, 59, 0.12);
+}
+
+.grade-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.grade-summary-text {
+  max-width: 480px;
+}
+
+.grade-verdict-title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.grade-verdict {
+  font-family: var(--font-body);
+  font-size: 0.96rem;
+  color: #382C22;
+  line-height: 1.5;
+}
+
+/* Arbiter's Counsel Sub-Panel */
+.arbiter-counsel-box {
+  background-color: #FAF4E8;
+  border: 1px solid #D8CCA8;
+  border-radius: 3px;
+  padding: 1.25rem 1.4rem;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.counsel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.counsel-icon {
+  font-size: 1.25rem;
+}
+
+.counsel-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.counsel-subtitle {
+  font-size: 0.85rem;
+  color: #6B5B4D;
+  margin-bottom: 1.1rem;
+}
+
+.feedback-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.counsel-feedback-card {
+  background-color: #FFFDF9;
+  border: 1px solid #E2D5BA;
+  border-radius: 3px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.counsel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.counsel-q-number {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7A6957;
+}
+
+.counsel-rating-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.22rem 0.65rem;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.rating-badge-correct {
+  background-color: #E7F3E7;
+  color: #246B24;
+  border: 1px solid #B4DCB4;
+}
+
+.rating-badge-partial {
+  background-color: #FFF4E0;
+  color: #8C5B00;
+  border: 1px solid #F0D4A0;
+}
+
+.rating-badge-incorrect {
+  background-color: #FDE8E8;
+  color: #A23B3B;
+  border: 1px solid #F6B8B8;
+}
+
+.counsel-q-prompt {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #3B3025;
+  margin-bottom: 0.6rem;
+}
+
+.counsel-student-answer {
+  background-color: #F6F0E0;
+  border-radius: 2px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin-bottom: 0.65rem;
+  color: #2B2118;
+}
+
+.counsel-field-label {
+  font-weight: 600;
+  color: #554435;
+  margin-right: 0.35rem;
+}
+
+.counsel-suggestion-box {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #3B3025;
+  margin-bottom: 0.65rem;
+}
+
+.counsel-suggestion-box .counsel-field-text {
+  margin-top: 0.2rem;
+  color: #2B2118;
+}
+
+.counsel-correction-box {
+  background-color: #FDF7EB;
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 0 2px 2px 0;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.counsel-correction-box .counsel-field-label {
+  color: #7A5310;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.counsel-correction-box .counsel-field-text {
+  color: #1F170F;
+}
+
+.combat-action-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-return-map {
+  display: inline-block;
+  background-color: var(--ink);
+  color: var(--panel-parchment);
+  text-decoration: none;
+  font-size: 0.92rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.btn-return-map:hover {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   7. RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 680px) {
+  .map-layout-container {
+    padding: 1.25rem 1rem 4rem;
+  }
+
+  .campaign-hud {
+    gap: 0.85rem;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .parchment-intro {
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .trail-path-line {
+    left: 1.5rem;
+    transform: none;
+  }
+
+  .trail-nodes {
+    gap: 1.75rem;
+  }
+
+  /* Collapse alternating trail to a single left-anchored column */
+  .map-node,
+  .map-node.node-left,
+  .map-node.node-right {
+    width: calc(100% - 3rem);
+    margin-left: 3rem;
+    margin-right: 0;
+    align-self: flex-start;
+  }
+
+  .map-node::after,
+  .map-node.node-left::after,
+  .map-node.node-right::after {
+    left: -1.5rem;
+    right: auto;
+    width: 1.5rem;
+  }
+
+  .map-node::before,
+  .map-node.node-left::before,
+  .map-node.node-right::before {
+    left: calc(-1.5rem - 4px);
+    right: auto;
+    transform: translateY(-50%);
+  }
+
+  .parchment-scroll {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .grade-header-row {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .combat-topic-title {
+    font-size: 1.4rem;
+  }
+
+  .boss-question-prompt {
+    font-size: 1.05rem;
+  }
+}
+

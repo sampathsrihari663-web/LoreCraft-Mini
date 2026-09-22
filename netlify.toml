@@ -1,0 +1,13 @@
+# Netlify Deployment Configuration for LoreCraft
+
+[build]
+  # Static site published from repository root
+  publish = "."
+  # Netlify Serverless Functions directory
+  functions = "netlify/functions"
+
+# Instant redirect from root domain to campaign map
+[[redirects]]
+  from = "/"
+  to = "/views/index.html"
+  status = 302

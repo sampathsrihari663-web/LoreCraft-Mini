@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LoreCraft — A multi-language fantasy RPG campaign syllabus turning programming languages into tiered dungeon trials evaluated by AI.">
+  <title>LoreCraft — Multi-Language Campaign Map</title>
+
+  <!-- Typography: Spectral (headings/titles) and Work Sans (body/labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Map Header & Campaign Dashboard -->
+  <header class="site-header">
+    <h1 class="site-title">LoreCraft</h1>
+    <p class="site-subtitle" id="site-subtitle">Multi-Language RPG Campaign Syllabus</p>
+
+    <!-- Campaign HUD: Stats at a glance for current realm -->
+    <div class="campaign-hud" id="campaign-hud" aria-label="Campaign Overview">
+      <div class="hud-stat">
+        <span class="hud-label">Realm Chambers</span>
+        <span class="hud-value" id="stat-total">16</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Cleared</span>
+        <span class="hud-value hud-cleared" id="stat-cleared">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Available</span>
+        <span class="hud-value hud-unlocked" id="stat-unlocked">1</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Locked</span>
+        <span class="hud-value hud-locked" id="stat-locked">15</span>
+      </div>
+    </div>
+
+    <!-- Realm / World Selector Tabs (Python, C#, C++, HTML, CSS, JavaScript) -->
+    <div class="world-selector-container">
+      <p class="world-selector-label">CHOOSE YOUR REALM</p>
+      <nav class="world-selector" id="world-selector" aria-label="Select Campaign Realm"></nav>
+    </div>
+
+    <!-- Auxiliary study & reset actions -->
+    <div class="header-actions">
+      <a href="../questions_and_answers.txt" target="_blank" class="btn-text-action" id="btn-study-guide">
+        📜 View All 6 Worlds Syllabus & Answers (.txt)
+      </a>
+      <button type="button" class="btn-text-action" id="btn-reset-progress">
+        ↺ Reset Current Realm Progress
+      </button>
+    </div>
+  </header>
+
+  <!-- Campaign Canvas Wrapper -->
+  <main class="map-layout-container">
+    <!-- Status / Alert Container (dynamic notices e.g. offline/demo mode or errors) -->
+    <div id="status-container" aria-live="polite"></div>
+
+    <!-- Parchment Intro Scroll: Updates dynamically with active realm details -->
+    <section class="parchment-intro" aria-label="Introduction to Active Realm">
+      <h2 class="intro-heading" id="world-intro-title">The Serpent Spire of Python</h2>
+      <p class="intro-text" id="world-intro-text">
+        Welcome, apprentice. Before you winds the multi-tiered campaign path.
+        Conquer each chamber's boss guardian with written explanations evaluated by the Arbiter.
+        Clear all bosses in a tier to unlock the higher mysteries of the next tier!
+      </p>
+    </section>
+
+    <!-- Trail Section: Scoped specifically to the winding path and nodes -->
+    <section class="trail-wrapper" aria-label="Campaign Trail Map">
+      <!-- Connecting central trail line -->
+      <div class="trail-path-line" aria-hidden="true"></div>
+
+      <!-- Winding trail nodes and Tier Dividers rendered dynamically by js/main.js -->
+      <div id="trail-nodes" class="trail-nodes" role="feed" aria-label="Campaign path chambers">
+        <!-- Loading placeholder while topics are retrieved -->
+        <div class="status-banner banner-notice" id="loading-indicator">
+          Surveying the realm's campaign trail...
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Main Controller Script (Vanilla ES Module) -->
+  <script type="module" src="../js/main.js"></script>
+</body>
+</html>
